@@ -82,12 +82,14 @@ final class MovieQuizViewController: UIViewController {
         let currentQuestion = questions[currentQuestionIndex]
         let givenAnswer = true
         showAnswerResult(isCorret: givenAnswer == currentQuestion.correctAnswer)
+       disabledButton()
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         let currentQuestion = questions[currentQuestionIndex]
         let givenAnswer = false
         showAnswerResult(isCorret: givenAnswer == currentQuestion.correctAnswer)
+        disabledButton()
     }
     
     // настраиваем шрифты
@@ -157,6 +159,10 @@ final class MovieQuizViewController: UIViewController {
         }
         // убираем рамку с ответом на новом вопросе
         imageView.layer.borderWidth = 0
+        
+        // делаем кнопки доступными
+        self.yesButton.isEnabled = true
+        self.noButton.isEnabled = true
     }
     
     // метод для показа результатов раунда квиза
@@ -175,6 +181,12 @@ final class MovieQuizViewController: UIViewController {
         
         alert.addAction(action)
         self.present(alert, animated: true, completion: nil)
+    }
+    
+    // выключаем кнопки (до показа следующего вопроса)
+    private func disabledButton() {
+        yesButton.isEnabled = false
+        noButton.isEnabled = false
     }
 }
 
