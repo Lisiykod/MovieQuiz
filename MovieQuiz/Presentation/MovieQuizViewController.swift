@@ -50,11 +50,11 @@ final class MovieQuizViewController: UIViewController {
     private let boldFontSize: CGFloat = 23.0
     
     // переменная, чтобы не дублировать вопрос
-    static private let questionText: String = "Рейтинг этого фильма больше чем 6?"
+    private static let questionText: String = "Рейтинг этого фильма больше чем 6?"
     
     // переменная с индексом текущего вопроса
     private var currentQuestionIndex = 0
-    private var correctAnswer = 0
+    private var correctAnswers = 0
     
     private let questions: [QuizQuestion] = [
         QuizQuestion(image: "The Godfather", text: questionText, correctAnswer: true),
@@ -121,7 +121,7 @@ final class MovieQuizViewController: UIViewController {
     private func showAnswerResult(isCorret: Bool) {
         // считаем количество правильных ответов
         if isCorret {
-            correctAnswer += 1
+            correctAnswers += 1
         }
         
         // даем разрешение на рисование рамки
@@ -143,7 +143,7 @@ final class MovieQuizViewController: UIViewController {
     private func showNextQuestionOrResult() {
         if currentQuestionIndex == questions.count - 1 {
             // идем в состояние "результат квиза"
-            let text = "Ваш результат: \(correctAnswer)/10"
+            let text = "Ваш результат: \(correctAnswers)/10"
             let viewModel = QuizResultsViewModel(
                 title: "Этот раунд окончен",
                 text: text,
@@ -171,7 +171,7 @@ final class MovieQuizViewController: UIViewController {
         let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
             // сбрасываем значения на начальные
             self.currentQuestionIndex = 0
-            self.correctAnswer = 0
+            self.correctAnswers = 0
             
             // заново показываем первый вопрос
             let firstAnswer = self.questions[self.currentQuestionIndex]
