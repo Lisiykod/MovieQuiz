@@ -14,6 +14,8 @@ class QuestionFactory: QuestionFactoryProtocol {
     // переменная, чтобы не дублировать вопрос
     private static let questionText: String = "Рейтинг этого фильма больше чем 6?"
 
+    lazy var arrayForRandomIndices: Array<Int> = Array(0..<questions.count)
+    
     private let questions: [QuizQuestion] = [
         QuizQuestion(image: "The Godfather", text: questionText, correctAnswer: true),
         QuizQuestion(image: "The Dark Knight", text: questionText, correctAnswer: true),
@@ -29,13 +31,20 @@ class QuestionFactory: QuestionFactoryProtocol {
     
     func requestNextQuestion() {
         
-        guard let index = (0..<questions.count).randomElement() else {
+        if arrayForRandomIndices.isEmpty {
+            arrayForRandomIndices = Array(0..<questions.count)
+        }
+        
+        arrayForRandomIndices.shuffle()
+        
+        guard let index = arrayForRandomIndices.first else {
             delegate?.didReceiveNextQuestion(question: nil)
             return
         }
-        
+
         let question = questions[safe: index]
         delegate?.didReceiveNextQuestion(question: question)
+        arrayForRandomIndices.removeFirst()
 
     }
     
