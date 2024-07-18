@@ -20,6 +20,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
+    // переменные для отображения результата
+    private var alertPresenter: AlertPresenterProtocol?
+    private var alert: AlertModel?
+    private var statisticService: StatisticServiceProtocol?
     
     // переменная с индексом текущего вопроса
     private var currentQuestionIndex = 0
@@ -40,10 +44,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         questionFactory.setup(delegate: self)
         self.questionFactory = questionFactory
         questionFactory.requestNextQuestion()
+        
+        let alertPresenter = AlertPresenter()
+        alertPresenter.setup(delegate: self)
+        self.alertPresenter = alertPresenter
+        
+        statisticService = StatisticService()
+        
     }
     
     // MARK: - QuestionFactoryDelegate
     
+    // метод, чтобы отдать новый вопрос квиза
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
             return
@@ -64,7 +76,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
         let givenAnswer = true
         showAnswerResult(isCorret: givenAnswer == currentQuestion.correctAnswer)
-       disableButtons()
+        disableButtons()
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
@@ -129,9 +141,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func showNextQuestionOrResult() {
         if currentQuestionIndex == questionsAmount - 1 {
             // идем в состояние "результат квиза"
-            let text = correctAnswers == questionsAmount ?
-                        "Поздравляем, вы ответили на 10 из 10!" :
-                        "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
+            var text = "Ваш результат: \(correctAnswers)/\(questionsAmount)\n"
+            if let statisticService = statisticService {
+                // сохраняем результаты
+                statisticService.store(correct: correctAnswers, total: questionsAmount)
+                text.append("Количество сыгранных квизов: \(statisticService.gameCount)\n Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.game.dateTimeString))\n Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%")
+            }
             let viewModel = QuizResultsViewModel(
                 title: "Этот раунд окончен",
                 text: text,
@@ -152,21 +167,20 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // метод для показа результатов раунда квиза
     private func show(quiz result: QuizResultsViewModel) {
-        let alert = UIAlertController(title: result.title, message: result.text, preferredStyle: .alert)
-        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
-            
+        
+        let alertModel = AlertModel(
+            title: result.title,
+            message: result.text,
+            buttonText: result.buttonText) { [weak self] in
             guard let self = self else { return }
-            
             // сбрасываем значения на начальные
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
             
             // заново показываем первый вопрос
-            questionFactory?.requestNextQuestion()
+            self.questionFactory?.requestNextQuestion()
         }
-        
-        alert.addAction(action)
-        self.present(alert, animated: true, completion: nil)
+        alertPresenter?.present(alert: alertModel)
     }
     
     // выключаем кнопки (до показа следующего вопроса)
@@ -174,6 +188,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         yesButton.isEnabled = false
         noButton.isEnabled = false
     }
+    
 }
 
 /*

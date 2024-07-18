@@ -13,7 +13,7 @@ class QuestionFactory: QuestionFactoryProtocol {
     
     // переменная, чтобы не дублировать вопрос
     private static let questionText: String = "Рейтинг этого фильма больше чем 6?"
-    
+
     private let questions: [QuizQuestion] = [
         QuizQuestion(image: "The Godfather", text: questionText, correctAnswer: true),
         QuizQuestion(image: "The Dark Knight", text: questionText, correctAnswer: true),
@@ -28,15 +28,19 @@ class QuestionFactory: QuestionFactoryProtocol {
     ]
     
     func requestNextQuestion() {
+        
         guard let index = (0..<questions.count).randomElement() else {
             delegate?.didReceiveNextQuestion(question: nil)
             return
         }
+        
         let question = questions[safe: index]
         delegate?.didReceiveNextQuestion(question: question)
+
     }
     
     func setup(delegate: QuestionFactoryDelegate) {
         self.delegate = delegate
     }
+     
 }
