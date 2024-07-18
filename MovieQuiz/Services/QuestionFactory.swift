@@ -14,7 +14,7 @@ class QuestionFactory: QuestionFactoryProtocol {
     // переменная, чтобы не дублировать вопрос
     private static let questionText: String = "Рейтинг этого фильма больше чем 6?"
 
-    lazy var arrayForRandomIndices: Array<Int> = Array(0..<questions.count)
+    private lazy var arrayForRandomIndices: Array<Int> = Array(0..<questions.count)
     
     private let questions: [QuizQuestion] = [
         QuizQuestion(image: "The Godfather", text: questionText, correctAnswer: true),
