@@ -15,7 +15,7 @@ final class StatisticService: StatisticServiceProtocol {
             storage.integer(forKey: Keys.gamesCount.rawValue)
         }
         set {
-            storage.setValue(newValue, forKey: Keys.gamesCount.rawValue)
+            storage.set(newValue, forKey: Keys.gamesCount.rawValue)
         }
     }
     
@@ -29,9 +29,9 @@ final class StatisticService: StatisticServiceProtocol {
             return best
         }
         set {
-            storage.setValue(newValue.correct, forKey: Keys.BestGame.correct.rawValue)
-            storage.setValue(newValue.total, forKey: Keys.BestGame.total.rawValue)
-            storage.setValue(newValue.game, forKey: Keys.BestGame.date.rawValue)
+            storage.set(newValue.correct, forKey: Keys.BestGame.correct.rawValue)
+            storage.set(newValue.total, forKey: Keys.BestGame.total.rawValue)
+            storage.set(newValue.game, forKey: Keys.BestGame.date.rawValue)
         }
     }
     
@@ -65,7 +65,7 @@ final class StatisticService: StatisticServiceProtocol {
             storage.integer(forKey: Keys.correctAnswers.rawValue)
         }
         set {
-            storage.setValue(newValue, forKey: Keys.correctAnswers.rawValue)
+            storage.set(newValue, forKey: Keys.correctAnswers.rawValue)
         }
     }
     

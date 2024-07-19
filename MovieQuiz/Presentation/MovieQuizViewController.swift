@@ -35,22 +35,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let mediumFontSize: CGFloat = 20.0
     private let boldFontSize: CGFloat = 23.0
     
+    // переменная для состояния кнопки
+    private var buttonIsEnable: Bool = false
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupFonts()
-        
-        let questionFactory = QuestionFactory()
-        questionFactory.setup(delegate: self)
-        self.questionFactory = questionFactory
-        questionFactory.requestNextQuestion()
-        
-        let alertPresenter = AlertPresenter()
-        alertPresenter.setup(delegate: self)
-        self.alertPresenter = alertPresenter
-        
-        statisticService = StatisticService()
-        
+        initialSetup()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -76,7 +68,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
         let givenAnswer = true
         showAnswerResult(isCorret: givenAnswer == currentQuestion.correctAnswer)
-        disableButtons()
+        buttonIsEnable = false
+        changeStateButton(isEnabled: buttonIsEnable)
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
@@ -85,7 +78,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
         let givenAnswer = false
         showAnswerResult(isCorret: givenAnswer == currentQuestion.correctAnswer)
-        disableButtons()
+        buttonIsEnable = false
+        changeStateButton(isEnabled: buttonIsEnable)
     }
     
     //MARK: - Private functions
@@ -145,7 +139,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             if let statisticService = statisticService {
                 // сохраняем результаты
                 statisticService.store(correct: correctAnswers, total: questionsAmount)
-                text.append("Количество сыгранных квизов: \(statisticService.gameCount)\n Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.game.dateTimeString))\n Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%")
+                text += """
+                        Количество сыгранных квизов: \(statisticService.gameCount)
+                        Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.game.dateTimeString))
+                        Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+                       """
             }
             let viewModel = QuizResultsViewModel(
                 title: "Этот раунд окончен",
@@ -161,8 +159,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.layer.borderWidth = 0
         
         // делаем кнопки доступными
-        self.yesButton.isEnabled = true
-        self.noButton.isEnabled = true
+        self.buttonIsEnable = true
+        self.changeStateButton(isEnabled: buttonIsEnable)
     }
     
     // метод для показа результатов раунда квиза
@@ -184,9 +182,23 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // выключаем кнопки (до показа следующего вопроса)
-    private func disableButtons() {
-        yesButton.isEnabled = false
-        noButton.isEnabled = false
+    private func changeStateButton(isEnabled: Bool) {
+        yesButton.isEnabled = isEnabled
+        noButton.isEnabled = isEnabled
+    }
+    
+    // метод для настройки связи с делегатами и сервисом статистики
+    private func initialSetup() {
+        let questionFactory = QuestionFactory()
+        questionFactory.setup(delegate: self)
+        self.questionFactory = questionFactory
+        questionFactory.requestNextQuestion()
+        
+        let alertPresenter = AlertPresenter()
+        alertPresenter.setup(delegate: self)
+        self.alertPresenter = alertPresenter
+        
+        statisticService = StatisticService()
     }
     
 }
