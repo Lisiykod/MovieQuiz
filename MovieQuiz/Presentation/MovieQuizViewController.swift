@@ -22,7 +22,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // переменные для отображения результата
     private var alertPresenter: AlertPresenterProtocol?
-    private var alert: AlertModel?
     private var statisticService: StatisticServiceProtocol?
     
     // переменная с индексом текущего вопроса
@@ -141,8 +140,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 // сохраняем результаты
                 statisticService.store(correct: correctAnswers, total: questionsAmount)
                 text += """
-                        Количество сыгранных квизов: \(statisticService.gameCount)
-                        Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.game.dateTimeString))
+                        Количество сыгранных квизов: \(statisticService.gamesCount)
+                        Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))
                         Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
                        """
             }
