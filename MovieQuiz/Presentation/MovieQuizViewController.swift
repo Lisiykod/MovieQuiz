@@ -43,6 +43,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         super.viewDidLoad()
         setupFonts()
         initialSetup()
+        questionFactory?.requestNextQuestion()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -192,7 +193,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let questionFactory = QuestionFactory()
         questionFactory.setup(delegate: self)
         self.questionFactory = questionFactory
-        questionFactory.requestNextQuestion()
         
         let alertPresenter = AlertPresenter()
         alertPresenter.setup(delegate: self)
