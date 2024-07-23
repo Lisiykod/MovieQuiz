@@ -13,7 +13,7 @@ struct GameResult {
     // количество вопросов квиза
     let total: Int
     // дата завершения раунда
-    let game: Date
+    let date: Date
     
     // метод сравнения по количеству правильных ответов
     func isBetterThan(another: GameResult) -> Bool {
