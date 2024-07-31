@@ -2,6 +2,7 @@ import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
+    
     @IBOutlet private weak var noButton: UIButton!
     
     @IBOutlet private  weak var yesButton: UIButton!
@@ -14,11 +15,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     @IBOutlet private weak var imageView: UIImageView!
     
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     // количество выводимых вопросов
     private let questionsAmount: Int = 10
     // переменные для отображения вопросов
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
+    private var movieLoader: MoviesLoading = MoviesLoader()
     
     // переменные для отображения результата
     private var alertPresenter: AlertPresenterProtocol?
@@ -42,7 +45,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         super.viewDidLoad()
         setupFonts()
         initialSetup()
-        questionFactory?.requestNextQuestion()
+        showLoadingIndicator()
+        questionFactory?.loadData()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -59,6 +63,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self?.show(quiz: viewModel)
         }
         
+    }
+    // если данные успешно загружены
+    func didLoadDataFromServer() {
+        // скрываем индикатор загрузки
+        activityIndicator.isHidden = true
+        // показываем следующий вопрос
+        questionFactory?.requestNextQuestion()
+    }
+    
+    // если пришла ошибка от сервера
+    func didFailToLoadData(with error: any Error) {
+        showNetworkError(message: error.localizedDescription)
     }
     
     // MARK: - Actions
@@ -92,10 +108,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         counterLabel.font = UIFont(name: mediumFont, size: mediumFontSize)
     }
     
-    // метод для конвертации моковских вопросов во вью модель для главного экрана
+    // метод для конвертации вопросов во вью модель для главного экрана
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         let questionStep = QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
         return questionStep
@@ -170,14 +186,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             title: result.title,
             message: result.text,
             buttonText: result.buttonText) { [weak self] in
-            guard let self = self else { return }
-            // сбрасываем значения на начальные
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            
-            // заново показываем первый вопрос
-            self.questionFactory?.requestNextQuestion()
-        }
+                guard let self = self else { return }
+                // сбрасываем значения на начальные
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                
+                // заново показываем первый вопрос
+                self.questionFactory?.requestNextQuestion()
+            }
         alertPresenter?.present(alert: alertModel)
     }
     
@@ -189,7 +205,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // метод для настройки связи с делегатами и сервисом статистики
     private func initialSetup() {
-        let questionFactory = QuestionFactory()
+        let questionFactory = QuestionFactory(moviesLoader: MoviesLoader())
         questionFactory.setup(delegate: self)
         self.questionFactory = questionFactory
         
@@ -200,6 +216,36 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         statisticService = StatisticService()
     }
     
+    // метод для показа индикатора загрузки
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    // метод для скрытия индикатора загрузки
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+    }
+    
+    // метод для показа алерта, если загрузка не удалась
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        let model = AlertModel(
+            title: "Что-то пошло не так",
+            message: message,
+            buttonText: "Попробовать еще раз") { [weak self] in
+                guard let self = self else { return }
+                // сбрасываем значения на начальные
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                // пробуем еще раз загрузить данные
+                showLoadingIndicator()
+                questionFactory?.loadData()
+                // заново показываем первый вопрос
+                self.questionFactory?.requestNextQuestion()
+            }
+        alertPresenter?.present(alert: model)
+    }
 }
 
 /*
@@ -264,4 +310,4 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
  Настоящий рейтинг: 5,8
  Вопрос: Рейтинг этого фильма больше чем 6?
  Ответ: НЕТ
-*/
+ */

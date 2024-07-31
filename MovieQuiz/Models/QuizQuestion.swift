@@ -9,7 +9,7 @@ import Foundation
 
 struct QuizQuestion {
     // название фильма, совпадающее с названием картинок из ассета
-    let image: String
+    let image: Data
     // строка с вопросом
     let text: String
     // правильный ли ответ
