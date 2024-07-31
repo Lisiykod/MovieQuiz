@@ -9,7 +9,8 @@ import Foundation
 
 // Отвечает за загрузку данных по URL
 struct NetworkClient {
-    private enum NetworError: Error {
+    
+    private enum NetworkError: Error {
         case codeError
     }
     
@@ -27,7 +28,7 @@ struct NetworkClient {
             // проверяем, что нам пришел успешный код ответа
             if let response = response as? HTTPURLResponse,
                response.statusCode < 200 || response.statusCode >= 300 {
-                handler(.failure(NetworError.codeError))
+                handler(.failure(NetworkError.codeError))
                 return
             }
             
