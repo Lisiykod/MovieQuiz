@@ -162,7 +162,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                        """
             }
             let viewModel = QuizResultsViewModel(
-                title: "Этот раунд окончен",
+                title: "Этот раунд окончен!",
                 text: text,
                 buttonText: "Сыграть еще раз")
             show(quiz: viewModel)
@@ -194,7 +194,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 // заново показываем первый вопрос
                 self.questionFactory?.requestNextQuestion()
             }
-        alertPresenter?.present(alert: alertModel)
+        alertPresenter?.present(alert: alertModel, id: "Game result")
     }
     
     // выключаем кнопки (до показа следующего вопроса)
@@ -244,7 +244,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 // заново показываем первый вопрос
                 self.questionFactory?.requestNextQuestion()
             }
-        alertPresenter?.present(alert: model)
+        alertPresenter?.present(alert: model, id: nil)
     }
 }
 
