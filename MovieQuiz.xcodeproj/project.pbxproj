@@ -16,7 +16,6 @@
 		AD5EE5DE284D7887003966EF /* UIColor+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD5EE5DD284D7887003966EF /* UIColor+Extensions.swift */; };
 		AD77F5742857F8810062FB14 /* Date+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD77F5732857F8810062FB14 /* Date+Extensions.swift */; };
 		AD7AFA552836189F00399704 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7AFA542836189F00399704 /* Array+Extensions.swift */; };
-		D0099A462C64B5A9001C3005 /* MovieQuizTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0099A452C64B5A9001C3005 /* MovieQuizTests.swift */; };
 		D0099A4D2C64BE0E001C3005 /* ArrayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0099A4C2C64BE0E001C3005 /* ArrayTests.swift */; };
 		D0099A4F2C64C080001C3005 /* MoviesLoaderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0099A4E2C64C080001C3005 /* MoviesLoaderTest.swift */; };
 		D0099A572C650FA5001C3005 /* MovieQuizUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0099A562C650FA5001C3005 /* MovieQuizUITests.swift */; };
@@ -70,7 +69,6 @@
 		AD77F5732857F8810062FB14 /* Date+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extensions.swift"; sourceTree = "<group>"; };
 		AD7AFA542836189F00399704 /* Array+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
 		D0099A432C64B5A9001C3005 /* MovieQuizTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MovieQuizTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D0099A452C64B5A9001C3005 /* MovieQuizTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieQuizTests.swift; sourceTree = "<group>"; };
 		D0099A4C2C64BE0E001C3005 /* ArrayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayTests.swift; sourceTree = "<group>"; };
 		D0099A4E2C64C080001C3005 /* MoviesLoaderTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviesLoaderTest.swift; sourceTree = "<group>"; };
 		D0099A542C650FA5001C3005 /* MovieQuizUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MovieQuizUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -217,7 +215,6 @@
 		D0099A442C64B5A9001C3005 /* MovieQuizTests */ = {
 			isa = PBXGroup;
 			children = (
-				D0099A452C64B5A9001C3005 /* MovieQuizTests.swift */,
 				D0099A4C2C64BE0E001C3005 /* ArrayTests.swift */,
 				D0099A4E2C64C080001C3005 /* MoviesLoaderTest.swift */,
 			);
@@ -404,7 +401,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0099A462C64B5A9001C3005 /* MovieQuizTests.swift in Sources */,
 				D0099A4D2C64BE0E001C3005 /* ArrayTests.swift in Sources */,
 				D0099A4F2C64C080001C3005 /* MoviesLoaderTest.swift in Sources */,
 			);

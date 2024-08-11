@@ -19,15 +19,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // переменные для отображения вопросов
     private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion?
     private var movieLoader: MoviesLoading = MoviesLoader()
     private let presenter: MovieQuizPresenter = MovieQuizPresenter()
     
     // переменные для отображения результата
     private var alertPresenter: AlertPresenterProtocol?
     private var statisticService: StatisticServiceProtocol?
-    
-    private var correctAnswers = 0
     
     // переменные для настройки шрифтов
     private let mediumFont: String = "YSDisplay-Medium"
@@ -43,6 +40,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         super.viewDidLoad()
         setupFonts()
         initialSetup()
+        presenter.viewController = self
         showLoadingIndicator()
         questionFactory?.loadData()
     }
@@ -51,17 +49,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // метод, чтобы отдать новый вопрос квиза
     func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {
-            return
-        }
-        currentQuestion = question
-        let viewModel = presenter.convert(model: question)
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
-        }
-        
+        presenter.didReceiveNextQuestion(question: question)
     }
+    
     // если данные успешно загружены
     func didLoadDataFromServer() {
         // скрываем индикатор загрузки
@@ -77,26 +67,48 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Actions
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        let givenAnswer = true
-        showAnswerResult(isCorret: givenAnswer == currentQuestion.correctAnswer)
+        presenter.yesButtonClicked()
         buttonIsEnable = false
         changeStateButton(isEnabled: buttonIsEnable)
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        let givenAnswer = false
-        showAnswerResult(isCorret: givenAnswer == currentQuestion.correctAnswer)
+        presenter.noButtonClicked()
         buttonIsEnable = false
         changeStateButton(isEnabled: buttonIsEnable)
     }
     
-    //MARK: - Private functions
+    // MARK: - Public Methods
+    
+    // метод для раскрашивания рамки
+    func showAnswerResult(isCorrect: Bool) {
+        // считаем количество правильных ответов
+        presenter.didAnswer(isCorrect: isCorrect)
+        
+        // даем разрешение на рисование рамки
+        imageView.layer.masksToBounds = true
+        // толщина рамки
+        imageView.layer.borderWidth = 8
+        // меняем цвет рамки
+        imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        // скругляем углы
+        imageView.layer.cornerRadius = 20
+        
+        // показываем вопрос с задержкой в секунду
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self = self else { return }
+            self.presenter.questionFactory = self.questionFactory
+            self.presenter.showNextQuestionOrResult()
+            // убираем рамку с ответом на новом вопросе
+            imageView.layer.borderWidth = 0
+            
+            // делаем кнопки доступными
+            self.buttonIsEnable = true
+            self.changeStateButton(isEnabled: buttonIsEnable)
+        }
+    }
+    
+    //MARK: - Private Methods
     // настраиваем шрифты
     private func setupFonts() {
         noButton.titleLabel?.font = UIFont(name: mediumFont, size: mediumFontSize)
@@ -107,69 +119,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // метод для вывода вопроса на экран
-    private func show(quiz step: QuizStepViewModel) {
+    func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
-    }
-    
-    // метод для раскрашивания рамки
-    private func showAnswerResult(isCorret: Bool) {
-        // считаем количество правильных ответов
-        if isCorret {
-            correctAnswers += 1
-        }
-        
-        // даем разрешение на рисование рамки
-        imageView.layer.masksToBounds = true
-        // толщина рамки
-        imageView.layer.borderWidth = 8
-        // меняем цвет рамки
-        imageView.layer.borderColor = isCorret ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        // скругляем углы
-        imageView.layer.cornerRadius = 20
-        
-        // показываем вопрос с задержкой в секунду
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-            guard let self = self else { return }
-            self.showNextQuestionOrResult()
-        }
-    }
-    
-    // метод, который показывает или следующий вопрос, или результат квиза
-    private func showNextQuestionOrResult() {
-        if presenter.isLastQuestion() {
-            // идем в состояние "результат квиза"
-            var text = "Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)\n"
-            if let statisticService = statisticService {
-                // сохраняем результаты
-                statisticService.store(correct: correctAnswers, total: presenter.questionsAmount)
-                text += """
-                        Количество сыгранных квизов: \(statisticService.gamesCount)
-                        Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))
-                        Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
-                       """
-            }
-            let viewModel = QuizResultsViewModel(
-                title: "Этот раунд окончен!",
-                text: text,
-                buttonText: "Сыграть еще раз")
-            show(quiz: viewModel)
-        } else {
-            presenter.switchToNextQuestion()
-            // идем в состояние "следующий вопрос"
-            self.questionFactory?.requestNextQuestion()
-        }
-        // убираем рамку с ответом на новом вопросе
-        imageView.layer.borderWidth = 0
-        
-        // делаем кнопки доступными
-        self.buttonIsEnable = true
-        self.changeStateButton(isEnabled: buttonIsEnable)
+       
     }
     
     // метод для показа результатов раунда квиза
-    private func show(quiz result: QuizResultsViewModel) {
+    func show(quiz result: QuizResultsViewModel) {
         
         let alertModel = AlertModel(
             title: result.title,
@@ -177,8 +135,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             buttonText: result.buttonText) { [weak self] in
                 guard let self = self else { return }
                 // сбрасываем значения на начальные
-                self.presenter.resetQuestionIndex()
-                self.correctAnswers = 0
+                self.presenter.restartGame()
                 
                 // заново показываем первый вопрос
                 self.questionFactory?.requestNextQuestion()
@@ -225,8 +182,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             buttonText: "Попробовать еще раз") { [weak self] in
                 guard let self = self else { return }
                 // сбрасываем значения на начальные
-                self.presenter.resetQuestionIndex()
-                self.correctAnswers = 0
+                self.presenter.restartGame()
                 // пробуем еще раз загрузить данные
                 showLoadingIndicator()
                 questionFactory?.loadData()
