@@ -7,38 +7,68 @@
 
 import UIKit
 
-final class MovieQuizPresenter {
+final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     // количество выводимых вопросов
-    let questionsAmount: Int = 10
-    var correctAnswers: Int = 0
+    private let questionsAmount: Int = 10
+    private var correctAnswers: Int = 0
     // переменная для отображения вопросов
-    var currentQuestion: QuizQuestion?
-    var questionFactory: QuestionFactoryProtocol?
-    var statisticService: StatisticService? = StatisticService()
+    private var currentQuestion: QuizQuestion?
+    private var questionFactory: QuestionFactoryProtocol?
+    private var statisticService: StatisticServiceProtocol?
     weak var viewController: MovieQuizViewController?
     
     // переменная с индексом текущего вопроса
     private var currentQuestionIndex: Int = 0
     
+    init(viewController: MovieQuizViewController) {
+        self.viewController = viewController
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        statisticService = StatisticService()
+        questionFactory?.loadData()
+        viewController.showLoadingIndicator()
+    }
+    
     // MARK: - Public Methods
     // методы для определения правильного ответа
     func yesButtonClicked() {
-       didAnswer(isYes: true)
+        didAnswer(isYes: true)
     }
     
     func noButtonClicked() {
         didAnswer(isYes: false)
     }
     
-    // метод для конвертации вопросов во вью модель для главного экрана
-    func convert(model: QuizQuestion) -> QuizStepViewModel {
-        QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
-            question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+    // методы для изменения индекса текущего вопроса
+    func isLastQuestion() -> Bool {
+        currentQuestionIndex == questionsAmount - 1
     }
     
+    func restartGame() {
+        // сбрасывает все значения
+        currentQuestionIndex = 0
+        correctAnswers = 0
+        // заново показываем первый вопрос
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func switchToNextQuestion() {
+        currentQuestionIndex += 1
+    }
+    
+    // метод для подсчета правильного ответа
+    private func didAnswer(isCorrect: Bool) {
+        if isCorrect {
+            correctAnswers += 1
+        }
+    }
+    
+    // метод, если требуется повторно загрузить данные
+    func reloadData() {
+        questionFactory?.loadData()
+    }
+    
+    // MARK: - QuestionFactoryDelegate
     // метод, чтобы отдать новый вопрос квиза
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
@@ -53,8 +83,32 @@ final class MovieQuizPresenter {
         
     }
     
+    // если данные успешно загружены
+    func didLoadDataFromServer() {
+        // скрываем индикатор загрузки
+        viewController?.hideLoadingIndicator()
+        // показываем следующий вопрос
+        questionFactory?.requestNextQuestion()
+    }
+    
+    // если пришла ошибка от сервера
+    func didFailToLoadData(with error: any Error) {
+        let message = error.localizedDescription
+        viewController?.showNetworkError(message: message)
+    }
+    
+    //MARK: - Privates Methods
+    
+    // метод для конвертации вопросов во вью модель для главного экрана
+    private func convert(model: QuizQuestion) -> QuizStepViewModel {
+        QuizStepViewModel(
+            image: UIImage(data: model.image) ?? UIImage(),
+            question: model.text,
+            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+    }
+    
     // метод, который показывает или следующий вопрос, или результат квиза
-    func showNextQuestionOrResult() {
+    private func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
             // идем в состояние "результат квиза"
             var text = "Ваш результат: \(correctAnswers)/\(self.questionsAmount)\n"
@@ -79,29 +133,25 @@ final class MovieQuizPresenter {
         }
     }
     
-    // методы для изменения индекса текущего вопроса
-    func isLastQuestion() -> Bool {
-        currentQuestionIndex == questionsAmount - 1
-    }
-    
-    func restartGame() {
-        currentQuestionIndex = 0
-        correctAnswers = 0
-    }
-    
-    func switchToNextQuestion() {
-        currentQuestionIndex += 1
-    }
-    
-    // метод для подсчета правильного ответа
-    func didAnswer(isCorrect: Bool) {
-        if isCorrect {
-            correctAnswers += 1
+    // метод для показа правильного ответа
+    private func proceedWithAnswer(isCorrect: Bool) {
+        // считаем количество правильных ответов
+        didAnswer(isCorrect: isCorrect)
+        
+        // раскрашиваем рамку с ответом
+        viewController?.highLightImageBorder(isCorrectAnswer: isCorrect)
+        
+        // показываем вопрос с задержкой в секунду
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self = self else { return }
+            self.proceedToNextQuestionOrResults()
+            
+            // делаем кнопки доступными
+            viewController?.enableButtons()
         }
     }
     
-    //MARK: - Privates Methods
-    
+    // метод для проверки правильного ответа
     private func didAnswer(isYes: Bool) {
         guard let currentQuestion = currentQuestion else {
             return
@@ -109,6 +159,8 @@ final class MovieQuizPresenter {
         
         let givenAnswer = isYes
         
-        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
+    
+    
 }

@@ -32,8 +32,9 @@ final class QuestionFactory: QuestionFactoryProtocol {
 //    ]
     
     
-    init(moviesLoader: MoviesLoading) {
+    init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate) {
         self.moviesLoader = moviesLoader
+        self.delegate = delegate
     }
     
     // метод для инициирования загрузки данных
