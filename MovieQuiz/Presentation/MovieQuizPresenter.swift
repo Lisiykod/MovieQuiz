@@ -16,12 +16,12 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     private var currentQuestion: QuizQuestion?
     private var questionFactory: QuestionFactoryProtocol?
     private var statisticService: StatisticServiceProtocol?
-    weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewControllerProtocol?
     
     // переменная с индексом текущего вопроса
     private var currentQuestionIndex: Int = 0
     
-    init(viewController: MovieQuizViewController) {
+    init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         statisticService = StatisticService()
@@ -68,6 +68,14 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         questionFactory?.loadData()
     }
     
+    // метод для конвертации вопросов во вью модель для главного экрана
+    func convert(model: QuizQuestion) -> QuizStepViewModel {
+        QuizStepViewModel(
+            image: UIImage(data: model.image) ?? UIImage(),
+            question: model.text,
+            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+    }
+    
     // MARK: - QuestionFactoryDelegate
     // метод, чтобы отдать новый вопрос квиза
     func didReceiveNextQuestion(question: QuizQuestion?) {
@@ -99,14 +107,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     //MARK: - Privates Methods
     
-    // метод для конвертации вопросов во вью модель для главного экрана
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
-            question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-    }
-    
     // метод для формирования сообщения
     private func makeResultsMessage() -> String {
         var text = "Ваш результат: \(correctAnswers)/\(self.questionsAmount)\n"
@@ -126,7 +126,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     private func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
             // идем в состояние "результат квиза"
-            var text = makeResultsMessage()
+            let text = makeResultsMessage()
             
             let viewModel = QuizResultsViewModel(
                 title: "Этот раунд окончен!",
