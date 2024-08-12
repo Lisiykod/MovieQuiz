@@ -107,20 +107,27 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
     
+    // метод для формирования сообщения
+    private func makeResultsMessage() -> String {
+        var text = "Ваш результат: \(correctAnswers)/\(self.questionsAmount)\n"
+        if let statisticService = statisticService {
+            // сохраняем результаты
+            statisticService.store(correct: correctAnswers, total: self.questionsAmount)
+            text += """
+                    Количество сыгранных квизов: \(statisticService.gamesCount)
+                    Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))
+                    Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+                   """
+        }
+        return text
+    }
+    
     // метод, который показывает или следующий вопрос, или результат квиза
     private func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
             // идем в состояние "результат квиза"
-            var text = "Ваш результат: \(correctAnswers)/\(self.questionsAmount)\n"
-            if let statisticService = statisticService {
-                // сохраняем результаты
-                statisticService.store(correct: correctAnswers, total: self.questionsAmount)
-                text += """
-                        Количество сыгранных квизов: \(statisticService.gamesCount)
-                        Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))
-                        Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
-                       """
-            }
+            var text = makeResultsMessage()
+            
             let viewModel = QuizResultsViewModel(
                 title: "Этот раунд окончен!",
                 text: text,
