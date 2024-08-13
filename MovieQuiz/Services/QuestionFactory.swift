@@ -11,29 +11,13 @@ final class QuestionFactory: QuestionFactoryProtocol {
     
     private let moviesLoader: MoviesLoading
     private weak var delegate: QuestionFactoryDelegate?
-    
-    // переменная, чтобы не дублировать вопрос
-//    private static let questionText: String = "Рейтинг этого фильма больше чем 6?"
 
     // переменная в которой будем хранить фильмы
     private var movies: [MostPopularMovie] = []
     
-//    private let questions: [QuizQuestion] = [
-//        QuizQuestion(image: "The Godfather", text: questionText, correctAnswer: true),
-//        QuizQuestion(image: "The Dark Knight", text: questionText, correctAnswer: true),
-//        QuizQuestion(image: "Kill Bill", text: questionText , correctAnswer: true),
-//        QuizQuestion(image: "The Avengers", text: questionText, correctAnswer: true),
-//        QuizQuestion(image: "Deadpool", text: questionText, correctAnswer: true),
-//        QuizQuestion(image: "The Green Knight", text: questionText, correctAnswer: true),
-//        QuizQuestion(image: "Old", text: questionText, correctAnswer: false),
-//        QuizQuestion(image: "The Ice Age Adventures of Buck Wild", text: questionText, correctAnswer: false),
-//        QuizQuestion(image: "Tesla", text: questionText, correctAnswer: false),
-//        QuizQuestion(image: "Vivarium", text: questionText, correctAnswer: false)
-//    ]
-    
-    
-    init(moviesLoader: MoviesLoading) {
+    init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate) {
         self.moviesLoader = moviesLoader
+        self.delegate = delegate
     }
     
     // метод для инициирования загрузки данных
@@ -85,11 +69,6 @@ final class QuestionFactory: QuestionFactoryProtocol {
                 self.delegate?.didReceiveNextQuestion(question: question)
             }
         }
-
-    }
-    
-    func setup(delegate: QuestionFactoryDelegate) {
-        self.delegate = delegate
     }
      
 }

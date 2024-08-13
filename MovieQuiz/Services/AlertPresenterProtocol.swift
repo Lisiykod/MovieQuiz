@@ -8,5 +8,5 @@
 import UIKit
 
 protocol AlertPresenterProtocol {
-    func present(alert: AlertModel)
+    func present(alert: AlertModel, id: String?)
 }
