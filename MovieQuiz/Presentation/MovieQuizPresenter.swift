@@ -56,13 +56,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         currentQuestionIndex += 1
     }
     
-    // метод для подсчета правильного ответа
-    private func didAnswer(isCorrect: Bool) {
-        if isCorrect {
-            correctAnswers += 1
-        }
-    }
-    
     // метод, если требуется повторно загрузить данные
     func reloadData() {
         questionFactory?.loadData()
@@ -84,7 +77,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         }
         currentQuestion = question
         let viewModel = convert(model: question)
-        
+    
         DispatchQueue.main.async { [weak self] in
             self?.viewController?.show(quiz: viewModel)
         }
@@ -133,6 +126,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
                 text: text,
                 buttonText: "Сыграть еще раз")
             viewController?.show(quiz: viewModel)
+            
         } else {
             self.switchToNextQuestion()
             // идем в состояние "следующий вопрос"
@@ -155,6 +149,13 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             
             // делаем кнопки доступными
             viewController?.enableButtons()
+        }
+    }
+    
+    // метод для подсчета правильного ответа
+    private func didAnswer(isCorrect: Bool) {
+        if isCorrect {
+            correctAnswers += 1
         }
     }
     

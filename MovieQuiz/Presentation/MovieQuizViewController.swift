@@ -36,6 +36,7 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        activityIndicator.hidesWhenStopped = true
         setupFonts()
         initialSetup()
         showLoadingIndicator()
@@ -98,13 +99,12 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     
     // метод для показа индикатора загрузки
     func showLoadingIndicator() {
-        activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     
     // метод для скрытия индикатора загрузки
     func hideLoadingIndicator() {
-        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
     }
     
     // метод для показа алерта, если загрузка не удалась
