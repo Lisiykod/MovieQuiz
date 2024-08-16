@@ -2,19 +2,12 @@ import UIKit
 
 final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
     
-    
     @IBOutlet private weak var noButton: UIButton!
-    
     @IBOutlet private  weak var yesButton: UIButton!
-    
     @IBOutlet private weak var questionTitleLabel: UILabel!
-    
     @IBOutlet private weak var textLabel: UILabel!
-    
     @IBOutlet private weak var counterLabel: UILabel!
-    
     @IBOutlet private weak var imageView: UIImageView!
-    
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     // переменные для отображения вопросов
@@ -85,7 +78,6 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     
     // метод для показа результатов раунда квиза
     func show(quiz result: QuizResultsViewModel) {
-        
         let alertModel = AlertModel(
             title: result.title,
             message: result.text,

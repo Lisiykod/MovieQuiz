@@ -81,7 +81,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         DispatchQueue.main.async { [weak self] in
             self?.viewController?.show(quiz: viewModel)
         }
-        
     }
     
     // если данные успешно загружены
@@ -126,7 +125,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
                 text: text,
                 buttonText: "Сыграть еще раз")
             viewController?.show(quiz: viewModel)
-            
         } else {
             self.switchToNextQuestion()
             // идем в состояние "следующий вопрос"
@@ -169,6 +167,4 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         
         proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
-    
-    
 }
